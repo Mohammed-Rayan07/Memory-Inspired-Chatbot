@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+data/locomo10.json
+results/*.tmp
