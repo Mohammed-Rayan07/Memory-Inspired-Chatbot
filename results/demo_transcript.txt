@@ -41,7 +41,7 @@ bot> Your favorite food is ramen.
 you> Where did I go last weekend?
 bot> You told me: "Last weekend I visited Kyoto."
 you> What do you remember about me?
-bot> Here is what I remember: job: nurse; pet: parrot; hobby: painting; name: Priya; city: Toronto; favorite food: ramen.
+bot> Here is what I remember: job: nurse; pet: parrot; hobby: painting; city: Toronto; name: Priya; favorite food: ramen.
 you> /memory
 bot> Working memory (7/7):
   [-5.09] Where do I live?
@@ -53,11 +53,11 @@ bot> Working memory (7/7):
   [+0.10] What do you remember about me?
 Long-term semantic memory (subject.slot = value, activation):
   other.city = Rome   B=-3.30
-  user.name = Priya   B=-2.51
+  user.name = Priya   B=-1.21
   user.city = Lisbon   B=-3.30  [superseded]
   user.job = nurse   B=-3.30
   user.pet = parrot   B=-3.30
-  user.food = ramen   B=-1.02
+  user.food = ramen   B=-0.93
   user.hobby = painting   B=-3.24
   user.city = Toronto   B=-3.12
 Long-term episodic traces: 9   total footprint: 24

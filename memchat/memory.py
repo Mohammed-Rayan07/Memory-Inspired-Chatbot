@@ -267,7 +267,7 @@ class MemoryChatbot:
             texts = [(h.text, h.times[-1], h.turn) for h in hits]
             ans = best_snippet(texts if texts else wm_hits[:1])
         if learn and ans.value is not None:
-            self._rehearse(ans)
+            self._rehearse(ans, now)
         return ans
 
     def _answer_slot(self, query: str, slot: str, subject: str, now: float) -> Answer:
@@ -289,10 +289,10 @@ class MemoryChatbot:
         texts = [(h.text, h.times[-1], h.turn) for h in hits]
         return read_slot(slot, subject, texts) or unknown()
 
-    def _rehearse(self, ans: Answer) -> None:
+    def _rehearse(self, ans: Answer, now: float) -> None:
         for tr in self.ltm.values():
             if tr.turn in ans.evidence:
-                tr.times.append(self.now)
+                tr.times.append(now)      # retrieval re-strengthens the trace at the time of recall
 
     # ------------------------------------------------------------------ transparency & user control
     def view(self) -> dict:

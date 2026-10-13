@@ -52,3 +52,13 @@ def test_forget_command():
     assert "Lisbon" in s.say("Where do I live?")
     s.say("/forget city")
     assert "don't know" in s.say("Where do I live?")
+
+
+def test_recall_rehearses_at_query_time():
+    bot = MemoryChatbot(MemConfig(wm_capacity=1))
+    bot.observe("My name is Priya.", 10.0, 1)
+    bot.observe("Fine.", 40.0, 2)
+    bot.observe("Okay.", 70.0, 3)
+    bot.answer("What is my name?", 5000.0, learn=True)
+    sem = next(t for t in bot.ltm.values() if t.kind == "semantic")
+    assert sem.times[-1] == 5000.0
