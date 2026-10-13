@@ -1,42 +1,221 @@
 # Memory-Inspired Chatbot
 
-IT 207 Human Intelligence course project. A dialogue memory organised after human memory:
-**attention gate → working memory (7 items) → episodic + semantic long-term memory → ACT-R activation, rehearsal and forgetting under a memory budget**.
-Inspired by human memory; it does not model the brain and its parameters are borrowed, not fitted.
+**IT 207 Human Intelligence: course project, Team 11**
 
-## Headline results (held-out test, budget = 40 items of a 120-turn conversation)
-| System | Accuracy |
+| Team member | Roll no. |
 |---|---|
-| Stateless | 0.167 |
-| Sliding window | 0.435 |
-| Plain RAG (FIFO) | 0.348 |
-| **Memory-inspired** | **0.673** (95% CI 0.652-0.696) |
+| Yuvaraj S | 251AI050 |
+| Abhinav Karthik Rao | 251AI003 |
+| Mohammed Rayan | 251AI025 |
+| Mohammed Ayyoub | 251AI026 |
+| Jayant Nenmeli | 251AI022 |
 
-With gold fact extraction the memory model reaches 0.903 (perception is the bottleneck on unseen phrasing).
-The advantage holds when memory is scarce; with unlimited memory, keeping everything is as good or better. Working memory gave no benefit; semantic memory and the attention gate matter most. See `report/` for the full analysis.
+> A chatbot memory organised after human memory: **attention, working memory, episodic and semantic long-term memory, rehearsal, decay and forgetting**.
+> It is *inspired by* human memory. It does not model the brain, and its parameters are borrowed from the literature, not fitted to human data.
 
-## Quick start
-```bash
-pip install -r requirements.txt   # Python 3.10+
-python -m pytest -q                      # 27 tests
-python chat.py                           # interactive: /memory  /forget <slot|all>  /skip <hours>  /quit
-python chat.py --demo                    # scripted multi-session demo
-python experiments/run_all.py            # all experiments -> results/results.json (~2 min)
-python experiments/make_figures.py       # figures -> report/figures/
-python report/build_report.py            # report (.docx); python report/build_slides.py for slides
-# real-data run needs LoCoMo:
-mkdir -p data && curl -o data/locomo10.json https://raw.githubusercontent.com/snap-research/locomo/main/data/locomo10.json
+---
+
+## 1. What is this project? (plain-language summary)
+
+Ordinary chatbots have a memory problem. Either they only see the last few messages and forget everything older, or they store every message forever and then struggle to find the right one. Human memory works differently. We pay attention to what matters, hold a few things in mind briefly, move important facts into long-term memory, let trivia fade, strengthen things we repeat or recall, and update our beliefs when something changes ("I moved to Toronto" replaces "I live in Lisbon").
+
+This project builds a chatbot memory that follows those ideas and then **measures honestly** whether it works better than simpler memories when the amount of memory is limited.
+
+The chatbot remembers personal facts and events that a user tells it across several conversations, for example name, city, job, pet, favourite food, and a one-off "last weekend I visited Kyoto". It can answer questions about them days later, it knows when a fact has been updated, it says "I don't know" when it was never told something, and it lets the user **see** and **delete** what it remembers.
+
+**What it is not:** it is not a large language model, and its replies are simple templates. The goal is to study and measure the *memory*, not to produce fluent conversation. It does not measure anyone's intelligence or memory.
+
+## 2. How it works
+
+![Architecture](report/figures/fig1_architecture.png)
+
+| Human memory concept | Component in the code | Where |
+|---|---|---|
+| Selective attention | A *salience* score for each message plus an *attention gate* (default 0.35). Messages below it are never stored long-term. | `memchat/memory.py` (`salience_of`) |
+| Working memory (about 7 items) | A buffer of the 7 most active recent messages. When it is full, the least active item is displaced and encoded into long-term memory. Restating a fact while it is still in the buffer counts as rehearsal. | `MemoryChatbot.observe` |
+| Episodic memory | Raw messages with timestamps, retrieved by BM25 text similarity plus activation. | `MemoryChatbot.retrieve` |
+| Semantic memory | Extracted `slot = value` facts (for example `city = Toronto`). A new value for the same slot *supersedes* the old one. | `MemoryChatbot._encode` |
+| Forgetting and rehearsal | ACT-R base-level activation `B = ln Σ (now − t_j)^(−d)`: it decays with time and grows with each rehearsal or recall. When the memory budget is exceeded, the lowest-priority trace is deleted. | `base_level`, `_enforce_budget` |
+| Perception | A transparent, rule-based extractor that finds facts in sentences and understands questions. It attributes facts to the user or to a third party. | `memchat/extract.py` |
+| Privacy and user control | `/memory` shows what is stored, `/forget` deletes it, and the bot refuses to answer questions about other people. | `memchat/dialogue.py` |
+
+**How a question is answered:** (1) if it is about a third party, decline; (2) look for the fact in working memory and the semantic store, newest statement wins; (3) otherwise search episodic memory and read the most recent matching fact; (4) otherwise say "I don't know".
+
+## 3. Repository layout
+
+```
+chat.py                 interactive chatbot and scripted demo
+memchat/
+  text.py               tokenizer and incremental BM25 index
+  extract.py            fact extraction and question understanding (rule-based)
+  memory.py             the memory model (working, episodic, semantic, activation, forgetting)
+  baselines.py          Stateless, Sliding-window and Plain-RAG baselines (same interface)
+  dialogue.py           chat session: replies, /memory, /forget, /skip
+experiments/
+  benchmark.py          synthetic multi-session persona benchmark with gold evidence
+  templates_dev.py      sentence templates used for development and tuning
+  templates_test.py     different, held-out templates used for all reported results
+  run.py                evaluation harness and metrics (accuracy, P/R/F1, bootstrap CIs, oracle mode)
+  locomo.py             real-data evidence-retrieval experiment on LoCoMo
+  run_all.py            runs every experiment -> results/results.json
+  make_figures.py       draws all figures -> report/figures/
+tests/                  28 unit tests
+results/                results.json (every number in the report) and demo_transcript.txt
+report/                 final report (docx and pdf), slides (pptx and pdf), figures, generator scripts
+docs/VIVA_PREP.md       likely viva questions with honest answers
+requirements.txt
 ```
 
-## Layout
-- `memchat/` core library (`memory.py` memory model, `extract.py` perception, `baselines.py`, `dialogue.py`, `text.py` BM25)
-- `experiments/` benchmark generator, **dev** (`templates_dev.py`) and **held-out test** (`templates_test.py`) templates, harness, LoCoMo run
-- `tests/`, `results/` (results.json, demo transcript), `report/` (report, slides, figures), `docs/` (viva notes)
+## 4. Installation
 
-## Evaluation protocol (and an honest caveat)
-Hyper-parameters were examined only on dev personas (seeds 1000-1029, dev templates). Reported numbers use test personas (seeds 2000-2099) with differently phrased templates (`templates_test.py`) that were written after the first commit (c95a2ee). **The extractor was not frozen at that commit**: before the first test run, patterns were generalised using dev errors and a salience bug was fixed; afterwards only third-party question handling changed (held-out accuracies verified identical). Extractor test P/R: 0.94/0.63 at c95a2ee, 0.96/0.73 final. The same team wrote the test templates and the patterns, so the test set is held out from tuning, not from the authors' knowledge; LoCoMo (not ours) and the oracle-perception run guard against this.
+Requires **Python 3.10 or newer**. The chatbot itself (`chat.py`, `memchat/`) uses only the Python standard library; NumPy and matplotlib are needed for the experiments and figures, python-docx and python-pptx only to rebuild the report and slides.
 
-## Limitations
-Synthetic templated benchmark, rule-based perception and reader (no LLM), no human evaluation, budget counted in items. Not a measure of anyone's intelligence or memory.
+```bash
+git clone <this repository> && cd Memory-Inspired-Chatbot
+pip install -r requirements.txt
+python -m pytest -q          # expect: 28 passed
+```
 
-Data: LoCoMo (Maharana et al., ACL 2024), downloaded from github.com/snap-research/locomo (not redistributed here).
+## 5. Using the chatbot
+
+```bash
+python chat.py --demo        # scripted three-session conversation with simulated days passing
+python chat.py               # interactive
+python chat.py --budget 30   # interactive with a hard memory limit of 30 items
+```
+
+| Command | What it does |
+|---|---|
+| `/memory` | Shows working-memory items, every stored fact with its activation, whether it was superseded, and the memory footprint |
+| `/forget <slot>` | Deletes everything about one slot: `name`, `city`, `job`, `pet`, `food`, `color`, `hobby`, `music`, `drink`, `birthday` |
+| `/forget all` | Deletes all memory |
+| `/skip <hours>` | Advances a simulated clock so you can watch decay and sessions without waiting |
+| `/quit` | Exit |
+| "What do you remember about me?" | Lists the facts it currently holds |
+
+**Example**
+
+```
+you> Hi, I'm Priya.                      bot> Got it. I'll remember your name is Priya.
+you> I live in Lisbon.                   bot> Got it. I'll remember that you live in Lisbon.
+you> /skip 72
+you> Big news: I live in Toronto now.    bot> Got it. I'll remember that you live in Toronto.
+you> Where do I live?                    bot> You live in Toronto.
+you> What is my favorite color?          bot> I don't know — you haven't told me that.
+you> Where does my sister live?          bot> I only keep track of facts about you, not about other people.
+```
+
+**What it understands:** simple statements such as "I live in Paris", "My favorite food is ramen", "I work as a nurse", "My birthday is in March", and matching questions. Unusual phrasings are missed, which is the main limitation (see Section 9). The full demo transcript is in `results/demo_transcript.txt`.
+
+## 6. Reproducing the experiments
+
+```bash
+python experiments/run_all.py       # about 1-2 minutes; downloads LoCoMo automatically; writes results/results.json
+python experiments/make_figures.py  # figures -> report/figures/
+python report/build_report.py       # report (docx); python report/build_slides.py for slides
+python report/build_readme.py       # regenerate this README from results.json
+```
+
+Everything is seeded and deterministic (only wall-clock latencies vary between runs). A fresh clone reproduces the committed results exactly.
+
+### Evaluation design
+* **Synthetic persona benchmark.** Each persona has 5 sessions of 24 turns (120 turns) spread over days. It states 7 facts (1-3 times each), updates 2 of them, mentions 4 facts about *other* people (distractors), tells 3 one-off episodes, and chats, with filler that deliberately shares words with the questions. At the end it is asked 12 questions: *fact*, *update* (latest value), *unanswerable* (must say "I don't know"), and *episodic* (one-off detail).
+* **Development vs. held-out test.** Hyper-parameters were examined only on 30 development personas (seeds 1000-1029, `templates_dev.py`). Every reported number comes from 100 test personas (1200 questions, seeds 2000-2099) using differently phrased templates (`templates_test.py`).
+* **Baselines**, all given the same memory budget and the same fact extractor and reader: *Stateless* (no memory), *Sliding window* (last B turns), *Plain RAG* (store everything, BM25 top-3, oldest evicted). Unbounded references are also reported.
+* **Real data.** LoCoMo (Maharana et al., ACL 2024): 1536 questions over 10 conversations (about 588 turns each), measuring whether the gold evidence turns are retrieved (recall@k). No language model is involved.
+* **Metrics.** Accuracy with 95% cluster-bootstrap confidence intervals, precision/recall/F1, hallucination rate, evidence grounding, latency, memory footprint, ablations, oracle analysis, sensitivity analysis.
+
+## 7. Results
+
+### Main comparison (memory budget = 40 items of a 120-turn conversation, held-out test)
+
+| System | Accuracy | Fact | Update | Unanswerable | Episodic |
+|---|---|---|---|---|---|
+| Stateless | 0.167 | 0.00 | 0.00 | 1.00 | 0.00 |
+| Sliding window | 0.435 | 0.27 | 0.62 | 0.87 | 0.29 |
+| Plain RAG (FIFO) | 0.348 | 0.16 | 0.39 | 0.87 | 0.29 |
+| Plain RAG k=10 (FIFO) | 0.364 | 0.17 | 0.47 | 0.87 | 0.29 |
+| **Memory-inspired** | 0.673 | 0.60 | 0.69 | 0.83 | 0.67 |
+
+The memory-inspired model scores **0.673** (95% CI 0.652-0.696), a paired gain of +0.24 over the sliding window and +0.32 over plain RAG (confidence intervals exclude zero). Unbounded references: full context 0.754, plain RAG 0.569.
+
+![By question type](report/figures/fig4_by_type.png)
+
+### Effect of the memory budget (accuracy)
+
+| Budget (items) | Sliding window | Plain RAG (FIFO) | Memory-inspired |
+|---|---|---|---|
+| 12 | 0.253 | 0.223 | 0.441 |
+| 16 | 0.284 | 0.246 | 0.512 |
+| 20 | 0.317 | 0.272 | 0.554 |
+| 30 | 0.387 | 0.322 | 0.606 |
+| 40 | 0.435 | 0.348 | 0.673 |
+| 60 | 0.537 | 0.411 | 0.676 |
+| 80 | 0.609 | 0.457 | 0.676 |
+| 120 | 0.754 | 0.569 | 0.676 |
+
+![Budget sweep](report/figures/fig3_budget_sweep.png)
+
+The advantage is clear when memory is scarce. When the whole conversation fits (budget 120), the sliding window wins. **The honest claim is that selective, cognitively organised memory helps under scarcity. It does not beat simply keeping everything when everything fits.**
+
+### Ablations (accuracy of the memory model with one component removed)
+
+| Variant | Budget 20 | Budget 40 |
+|---|---|---|
+| Full model | 0.554 | 0.673 |
+| - attention gate | 0.547 | 0.577 |
+| - semantic memory | 0.493 | 0.575 |
+| - decay (no recency) | 0.505 | 0.676 |
+| - supersession | 0.547 | 0.670 |
+| - working memory | 0.564 | 0.672 |
+
+Semantic memory and the attention gate matter most. Decay matters only when memory is tight. Supersession has a small effect. **Working memory gave no benefit and slightly hurt at budget 20.** We report this negative result rather than hide it.
+
+### Perception vs. memory (oracle analysis)
+
+On unseen phrasings the rule-based extractor has precision 0.96 but recall only 0.73 (dev: 1.00/1.00), and the question parser understands 79% of held-out questions. With *gold* fact extraction supplied to every system, accuracy at budget 40 is **0.903** (memory-inspired) vs. 0.613 (window) and 0.440 (RAG). The memory architecture is stronger than the headline suggests, and the hand-written perception layer is the main bottleneck.
+
+### Real data: LoCoMo evidence recall@5
+
+| Budget (turns) | BM25 + FIFO eviction | Memory-inspired (episodic only) |
+|---|---|---|
+| 50 | 0.053 | 0.076 |
+| 100 | 0.111 | 0.145 |
+| 200 | 0.207 | 0.266 |
+| unbounded | 0.490 | 0.455 |
+
+At every fixed budget the memory model retrieves more gold evidence. With unbounded storage, plain BM25 is better. Recall is low at small budgets because most evidence turns have been forgotten.
+
+Also in the report: error analysis, accuracy vs. temporal distance, repetition effects, sensitivity to the gate and decay, working-memory capacity, latency and scaling.
+
+## 8. Ethics and responsible use
+* **Privacy:** retention is bounded, `/memory` is fully transparent, `/forget` deletes on request, and the bot does not answer about third parties.
+* **Gaps:** third-party statements are still stored as raw text until forgotten or evicted; memory is not encrypted at rest; there is no user authentication or multi-user separation.
+* **Bias:** the extractor expects English and capitalised Latin-script names; the salience heuristic decides what counts as important.
+* **No over-claiming:** this is a computational proxy, not a measurement of intelligence, and it does not diagnose anything.
+
+## 9. Limitations
+Synthetic, templated benchmark (held-out templates reduce but do not remove this circularity); rule-based perception and replies (no language model, no human evaluation); memory budget counted in items, not tokens; borrowed ACT-R parameters; heuristic salience; working memory did not help in this task.
+
+**Honest note on the test split.** The test templates were written after the first commit (c95a2ee), but the extractor was *not* frozen at that commit. Before the first test run, patterns were generalised using development-set errors and a salience bug was fixed. Afterwards only third-party question handling changed, and all held-out accuracies were verified identical. Extractor test precision/recall was 0.94/0.63 at c95a2ee and is 0.96/0.73 now. The same team wrote the test templates and the patterns, so the test set is held out from *tuning*, not from our knowledge of the extractor. LoCoMo (data we did not write) and the oracle analysis guard against this.
+
+## 10. Future work
+Replace the extractor and reader with a language model; use embeddings instead of BM25; learned salience; fit decay parameters; evaluate on LongMemEval and Multi-Session Chat; consolidation by summarisation; privacy engineering (consent, encryption, per-user stores).
+
+## 11. Deliverables for the course
+| Course deliverable | File |
+|---|---|
+| Final report (7 chapters, references, appendices) | `report/Memory_Inspired_Chatbot_Report.pdf` (editable `.docx`) |
+| Presentation slides | `report/Memory_Inspired_Chatbot_Slides.pptx` (and `.pdf`) |
+| Architecture diagram | `report/figures/fig1_architecture.png` |
+| Source code | `memchat/`, `chat.py`, `experiments/` |
+| Dataset / source information | Synthetic generator in `experiments/benchmark.py`; LoCoMo from github.com/snap-research/locomo (downloaded automatically, not redistributed) |
+| Experimental results | `results/results.json`, `report/figures/` |
+| Tests | `tests/` (28 tests) |
+| Viva preparation | `docs/VIVA_PREP.md` |
+
+## 12. References (main)
+Atkinson & Shiffrin (1968); Baddeley & Hitch (1974); Baddeley (2000); Miller (1956); Cowan (2001); Tulving (1972); Ebbinghaus (1885); Anderson & Schooler (1991); Anderson et al. (2004, ACT-R); McClelland, McNaughton & O'Reilly (1995); Jung & Haier (2007, P-FIT); Lewis et al. (2020, RAG); Liu et al. (2024, *Lost in the Middle*); Xu, Szlam & Weston (2022, MSC); Maharana et al. (2024, LoCoMo); Wu et al. (2025, LongMemEval); Packer et al. (2023, MemGPT); Park et al. (2023, Generative Agents); Zhong et al. (2024, MemoryBank); Robertson & Zaragoza (2009, BM25). Full citations are in the report.
+
+## 13. Use of AI assistance
+The code, experiments and draft report were developed with the help of an AI coding assistant (Claude Code). The team is responsible for understanding, verifying and defending all content.

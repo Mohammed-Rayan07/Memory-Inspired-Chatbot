@@ -40,7 +40,7 @@ def slide(title, bullets=None, fig=None, figw=7.2, note=None, size=23, bw=None):
 s = prs.slides.add_slide(blank)
 tb(s, 0.8, 2.0, 11.5, 1.2, "A Memory-Inspired Chatbot", 48, True, NAVY)
 tb(s, 0.8, 3.3, 11.5, 1.0, "Working memory, long-term memory and forgetting for dialogue", 26, False, GREEN)
-tb(s, 0.8, 4.8, 11.5, 1.6, ["IT 207 Human Intelligence project", "[Team members]  |  [Instructor]  |  October 2026"], 18, False, GREY)
+tb(s, 0.8, 4.8, 11.5, 1.6, ["IT 207 Human Intelligence project  |  Team 11  |  October 2026", "Yuvaraj S (251AI050), Abhinav Karthik Rao (251AI003), Mohammed Rayan (251AI025),", "Mohammed Ayyoub (251AI026), Jayant Nenmeli (251AI022)"], 18, False, GREY)
 
 slide("Problem: chatbots forget, or remember everything",
       ["Stateless between sessions; finite context window",

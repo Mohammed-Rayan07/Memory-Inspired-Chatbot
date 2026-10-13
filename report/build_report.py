@@ -22,9 +22,11 @@ D.p("Working Memory, Long-Term Memory and Forgetting for Dialogue", bold=True, a
 D.p("Human intelligence concept: working and long-term memory (Atkinson-Shiffrin, Baddeley, Tulving, ACT-R)", align="center", italic=True, after=2)
 D.p("AI implementation: retrieval-augmented generation and memory modules", align="center", italic=True, after=40)
 D.p("**Team members**", align="center", after=2)
-D.p("[Team member 1: name, roll number]", align="center", after=0)
-D.p("[Team member 2: name, roll number]", align="center", after=0)
-D.p("[Team member 3: name, roll number]", align="center", after=30)
+D.p("**Team 11**", align="center", after=2)
+for _n, _r in (("Yuvaraj S", "251AI050"), ("Abhinav Karthik Rao", "251AI003"), ("Mohammed Rayan", "251AI025"),
+               ("Mohammed Ayyoub", "251AI026"), ("Jayant Nenmeli", "251AI022")):
+    D.p(f"{_n}  ({_r})", align="center", after=0)
+D.p("", after=20)
 D.p("Instructor: [name]        Date: October 2026", align="center", after=40)
 D.p("Source code, data-generation scripts, results and this report: repository *Memory-Inspired-Chatbot*", align="center", size=10)
 D.pagebreak()
@@ -592,12 +594,14 @@ D.table(["Parameter", "Default", "Source / note"], [
     ["Test seeds / dev seeds", "2000-2099 / 1000-1029", "Deterministic generator"],
 ], "Default parameters.", widths=[2.2, 1.2, 3.1])
 D.h("Appendix B: Individual contribution statement", 1)
-D.p("*(To be completed by the team before submission.)*", italic=True)
+D.p("*(Each member should describe their own contribution before submission.)*", italic=True)
 D.table(["Team member", "Contribution"], [
-    ["[Name 1]", "[e.g., system design, memory module implementation, experiments]"],
-    ["[Name 2]", "[e.g., literature review, benchmark design, report writing]"],
-    ["[Name 3]", "[e.g., evaluation, figures, presentation, demo]"],
-], "Individual contributions.", widths=[1.6, 4.9])
+    ["Yuvaraj S (251AI050)", "[to be filled by the team]"],
+    ["Abhinav Karthik Rao (251AI003)", "[to be filled by the team]"],
+    ["Mohammed Rayan (251AI025)", "[to be filled by the team]"],
+    ["Mohammed Ayyoub (251AI026)", "[to be filled by the team]"],
+    ["Jayant Nenmeli (251AI022)", "[to be filled by the team]"],
+], "Individual contributions (Team 11).", widths=[2.4, 4.1])
 D.h("Appendix C: Use of AI assistance", 1)
 D.p("*(Complete according to your course's policy.)* This project's code, experiments and draft report were prepared with the assistance of an AI coding assistant (Claude Code). "
     "The team is responsible for understanding, verifying and defending all content. [Describe what the team reviewed, changed or verified.]", italic=False)
