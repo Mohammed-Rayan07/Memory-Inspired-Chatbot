@@ -17,7 +17,7 @@ The advantage holds when memory is scarce; with unlimited memory, keeping everyt
 
 ## Quick start
 ```bash
-pip install numpy matplotlib pytest python-docx python-pptx
+pip install -r requirements.txt   # Python 3.10+
 python -m pytest -q                      # 27 tests
 python chat.py                           # interactive: /memory  /forget <slot|all>  /skip <hours>  /quit
 python chat.py --demo                    # scripted multi-session demo

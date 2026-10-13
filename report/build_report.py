@@ -342,9 +342,9 @@ D.p("The 27 unit tests cover: extraction of user vs. third-party facts (includin
     "understanding, recall after an update, refusal to leak third-party facts, budget enforcement while retaining important facts, "
     "baselines forgetting under the same budget, monotonic decay and rehearsal gain, and the /forget command. All pass (`python -m pytest -q`).", align="justify")
 D.h("5.5 Reproducibility", 2)
-D.code('''pip install numpy matplotlib pytest python-docx python-pptx
+D.code('''pip install -r requirements.txt   # Python 3.10+
 python -m pytest -q
-python experiments/run_all.py        # all experiments -> results/results.json (about 2 minutes)
+python experiments/run_all.py        # all experiments -> results/results.json (about 1-2 minutes)
 python experiments/make_figures.py   # figures
 python report/build_report.py        # this report
 # LoCoMo: curl -o data/locomo10.json https://raw.githubusercontent.com/snap-research/locomo/main/data/locomo10.json''')

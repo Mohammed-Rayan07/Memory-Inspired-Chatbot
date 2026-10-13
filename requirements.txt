@@ -1,0 +1,5 @@
+numpy
+matplotlib
+pytest
+python-docx
+python-pptx

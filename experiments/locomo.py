@@ -15,7 +15,23 @@ def _ts(s: str) -> float:
     return datetime.strptime(s.strip(), "%I:%M %p on %d %B, %Y").timestamp()
 
 
+URL = "https://raw.githubusercontent.com/snap-research/locomo/main/data/locomo10.json"
+
+
+def ensure_data() -> None:
+    """Download LoCoMo (not redistributed in this repo) on first use."""
+    if PATH.exists():
+        return
+    import urllib.request
+    PATH.parent.mkdir(exist_ok=True)
+    try:
+        urllib.request.urlretrieve(URL, PATH)
+    except Exception as e:  # pragma: no cover
+        raise SystemExit(f"Could not download LoCoMo ({e}).\nDownload it manually:\n  curl -o {PATH} {URL}")
+
+
 def load():
+    ensure_data()
     data = json.load(open(PATH))
     convs = []
     for e in data:
