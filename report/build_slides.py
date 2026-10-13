@@ -84,7 +84,7 @@ slide("Ablations: what actually matters", fig="fig5_ablation.png", figw=7.6,
                "Attention gate: −0.10 at B=40",
                "Decay: −0.05 at B=20, none at B=40",
                "Supersession: small",
-               "Working memory: no measurable benefit (negative result)"], bw=4.7, size=20)
+               "Working memory: no benefit, slightly hurts at B=20 (negative result)"], bw=4.7, size=20)
 slide("Perception vs. memory", fig="fig6_oracle.png", figw=6.5,
       bullets=[f"Extractor on held-out phrasing: P {R['extractor_test']['p']:.2f}, R {R['extractor_test']['r']:.2f}",
                f"Question parser covers {R['query_cov_test']*100:.0f}% of held-out questions",

@@ -266,12 +266,15 @@ D.table(["Question type", "Per persona", "What it tests", "Correct if"], [
     ["unanswerable", "2", "Abstention; third-party facts must not leak", "System says it doesn't know"],
     ["episodic", "3", "Recall of one-off chit-chat detail (counterweight to selective encoding)", "Gold detail is in the returned utterance"],
 ], "Benchmark question types.", widths=[1.1, 0.9, 2.9, 1.6])
-D.p("**Dev/test separation.** Templates for sentences and questions are in two files. The *development* templates were used to build the "
-    "system and tune hyper-parameters (30 personas, seeds 1000-1029). The *test* templates were written *after the extractor and memory "
-    "code were committed* (commit c95a2ee), use different phrasings and include forms the extractor does not cover, and were never used for "
-    f"tuning (100 personas, seeds 2000-2099, {R['n_test_queries']} questions). Small post-freeze changes were limited to bug fixes found on development data or in the demo, and "
-    "we re-ran all experiments to confirm that held-out accuracies were unchanged (Chapter 6). Gold labels exist for every fact statement, so extractor "
-    "precision and recall are measured directly.", align="justify")
+D.p("**Dev/test separation and an honest account of the process.** Templates for sentences and questions are in two files. The *development* templates were used to build the "
+    "system and tune hyper-parameters (30 personas, seeds 1000-1029). The *test* templates use different phrasings, include forms the extractor does not cover, and were never used for "
+    f"tuning (100 personas, seeds 2000-2099, {R['n_test_queries']} questions). The order of events matters and is as follows. (1) The extractor and memory code were first committed in c95a2ee. "
+    "(2) The test templates were then written. (3) *Before the first test-set run* we changed the code again: several extractor patterns were generalised to fix errors seen on "
+    "*development* data (third-person frames such as \"my neighbor works as a ...\", \"is now\", a trailing \"these days\"), and a salience bug was fixed (the pronoun \"I\" was counted as a named entity). "
+    "(4) After the first test run, the only change was refusal/keyword handling for third-party *questions* (motivated by the demo), and we re-ran everything to confirm that all held-out accuracies were identical. "
+    "The extractor was therefore *not* frozen at c95a2ee. Its test-set precision/recall was 0.94/0.63 (F1 0.75) at c95a2ee and is 0.96/0.73 (F1 0.83) in the final version "
+    "(development: 0.99/0.91 and 1.00/1.00). Moreover, the same team (with AI assistance) wrote both the test templates and the patterns, so the test split is held out from *tuning*, not from the authors' knowledge of the extractor. "
+    "This is why the LoCoMo run, whose data we did not write, and the oracle-perception analysis matter. Gold labels exist for every fact statement, so extractor precision and recall are measured directly.", align="justify")
 D.p("**LoCoMo.** For each conversation we feed all turns in order with their real session timestamps, then for each question retrieve the top-k "
     "turns and compare them with the annotated evidence turn identifiers (evidence recall@k). No language model is involved. Adversarial "
     "(unanswerable) questions are excluded.", align="justify")
@@ -380,8 +383,8 @@ D.p(f"Three observations temper this result. (1) The unbounded references are in
     f"{f3(M['Full context (ref., unbounded)']['acc'])}, higher than the memory-inspired model, because it keeps every episodic detail "
     f"(episodic accuracy {f2(M['Full context (ref., unbounded)']['episodic'])} vs. {f2(M[MI]['episodic'])}). Selective memory trades detail for compactness: "
     f"it holds about {M[MI]['size']:.0f} items instead of {M['Full context (ref., unbounded)']['size']:.0f}. (2) Fact accuracy of {f2(M[MI]['fact'])} is capped by "
-    f"perception on unseen phrasings (Section 6.4). (3) Plain RAG with unlimited storage reaches only {f3(M['Plain RAG (ref., unbounded)']['acc'])} on update questions "
-    f"({f2(M['Plain RAG (ref., unbounded)']['update'])}), because its top-3 retrieval often returns the old statement or noise instead of the newest value. "
+    f"perception on unseen phrasings (Section 6.4). (3) Plain RAG with unlimited storage reaches only {f2(M['Plain RAG (ref., unbounded)']['update'])} on update questions "
+    f"(overall {f3(M['Plain RAG (ref., unbounded)']['acc'])}), because its top-3 retrieval often returns the old statement or noise instead of the newest value. "
     f"Structured updating is what the semantic store provides.", align="justify")
 
 D.h("6.2 Effect of the memory budget", 2)
@@ -389,8 +392,8 @@ Bs = sorted(int(b) for b in R["sweep"])
 D.table(["Budget"] + [str(b) for b in Bs], [[n] + [f3(R["sweep"][str(b)][n]["acc"]) for b in Bs] for n in (SW, RG, MI)],
         "Accuracy vs. memory budget (conversation length = 120 turns).", size=8.5)
 D.figure(FIG / "fig3_budget_sweep.png", "Accuracy vs. memory budget with 95% CIs (shaded).", 5.0)
-D.p(f"The memory-inspired model leads at every budget up to 40 items, by 0.19 to 0.24 absolute at budgets 12-40. Its curve then flattens at "
-    f"{f3(R['sweep']['60'][MI]['acc'])}-{f3(R['sweep']['120'][MI]['acc'])} because it has already retained everything it will encode "
+D.p(f"The memory-inspired model leads at every budget up to 40 items, by 0.19 to 0.24 absolute at budgets 12-40. Its curve then plateaus at "
+    f"{f3(R['sweep']['60'][MI]['acc'])} because it has already retained everything it will encode "
     f"(the gate discards low-salience episodic detail and perception misses some facts), whereas the window and RAG keep improving as budget grows. "
     f"At a budget of 120, where the whole conversation fits, the sliding window is better ({f3(R['sweep']['120'][SW]['acc'])} vs. {f3(R['sweep']['120'][MI]['acc'])}). "
     f"The honest conclusion is therefore narrow: **cognitively inspired selective memory helps when memory is scarce relative to the conversation; it does not beat simply keeping everything when everything fits.**", align="justify")
@@ -406,11 +409,11 @@ D.table(["Variant", "Acc. (B=20)", "Δ vs full [95% CI]", "Acc. (B=40)", "Δ vs 
         "Ablations of the memory-inspired model (paired cluster bootstrap).", size=8.5, widths=[1.7, .8, 1.5, .8, 1.5])
 D.figure(FIG / "fig5_ablation.png", "Ablation results at budgets 20 and 40.", 6.3)
 D.bullets([
-    f"**Semantic memory** is the single most important component at both budgets (Δ {A20['- semantic memory']['diff'][0]:+.3f} and {A40['- semantic memory']['diff'][0]:+.3f}). Compact (slot = value) traces survive eviction and answer directly. Without them the model only has noisy episodic retrieval, though it then does better on episodic detail ({f2(A40['- semantic memory']['episodic'])}).",
+    f"**Semantic memory** is the single most important component at both budgets (Δ {A20['- semantic memory']['diff'][0]:+.3f} and {A40['- semantic memory']['diff'][0]:+.3f}). Compact (slot = value) traces survive eviction and answer directly. Without them the model only has noisy episodic retrieval, though at B=20 it then does better on episodic detail ({f2(A20['- semantic memory']['episodic'])} vs. {f2(A20['Full model']['episodic'])}).",
     f"**Attention gate** matters at budget 40 (Δ {A40['- attention gate']['diff'][0]:+.3f}), where it keeps filler out of the store, and not at budget 20 (Δ {A20['- attention gate']['diff'][0]:+.3f}, interval includes zero at that budget), where there is little room for anything but facts.",
     f"**Decay (recency)** matters only when memory is tight (Δ {A20['- decay (no recency)']['diff'][0]:+.3f} at B=20) and is indistinguishable from zero at B=40 (Δ {A40['- decay (no recency)']['diff'][0]:+.3f}, CI {A40['- decay (no recency)']['diff'][1]:+.3f} to {A40['- decay (no recency)']['diff'][2]:+.3f}). It decides which traces to evict, and eviction is rare at B=40.",
     f"**Supersession** has a small effect (Δ about {A40['- supersession']['diff'][0]:+.3f}). The newest-statement rule already selects the right value, and supersession mainly changes what is evicted first.",
-    f"**Working memory** gave **no measurable benefit**: removing it changes accuracy by {A20['- working memory']['diff'][0]:+.3f} (B=20) and {A40['- working memory']['diff'][0]:+.3f} (B=40). Its seven slots also count against the budget. The buffer exists for dialogue coherence and rehearsal counting, neither of which this end-of-conversation recall task rewards. We keep it because it is part of the theory-faithful design and report this as a negative result.",
+    f"**Working memory** gave **no benefit** and slightly *hurt* at B=20: removing it changes accuracy by {A20['- working memory']['diff'][0]:+.3f} (95% CI {A20['- working memory']['diff'][1]:+.3f} to {A20['- working memory']['diff'][2]:+.3f}) at B=20 and {A40['- working memory']['diff'][0]:+.3f} at B=40 (CI includes zero). Its seven slots count against the budget. The buffer exists for dialogue coherence and rehearsal counting, neither of which this end-of-conversation recall task rewards. We keep it because it is part of the theory-faithful design and report this as a negative result.",
 ])
 
 D.h("6.4 Perception versus memory: oracle analysis", 2)
@@ -436,7 +439,7 @@ D.table(["System", "Wrong value", "False \"don't know\"", "Hallucination (unansw
         f"Error counts at B=40 ({R['n_test_queries']} questions per system).", size=9)
 D.bullets([
     f"**False \"don't know\"** dominates the baselines ({E[SW]['false_unknown']} and {E[RG]['false_unknown']}): the fact was evicted or never retrieved. The memory model has about half as many ({E[MI]['false_unknown']}), mostly caused by perception misses (the fact was never extracted).",
-    "**Hallucinations (33 for the memory model, 26 for each baseline)** are not memory errors but a parser limitation: held-out phrasings such as \"What is my main hobby?\" are not recognised as slot questions, so the system falls back to returning the closest utterance (\"The old hobby store on Main Street is gone\", 11 cases; a friend's favourite music genre, 11; a friend's favourite food, 8; one unrelated utterance, 3). The system should abstain when no slot is recognised and the best match is weak. A relevance threshold on this fallback is a straightforward improvement we did not tune on test data.",
+    "**Hallucinations (33 for the memory model, 26 for each baseline)** are not memory errors but largely a parser limitation: held-out phrasings such as \"What is my main hobby?\" or \"Which music genre do I like?\" are not recognised as slot questions, so the system falls back to returning the closest utterance. For the memory model the 33 cases were hobby 11, music 11, food 8 and city 3 questions, all via this episodic fallback. Examples we inspected: \"The old hobby store on Main Street is gone\" (hobby), a friend's favourite music genre (music) and \"I have a canary at home\" (city). The system should abstain when no slot is recognised and the best match is weak. A relevance threshold on this fallback is a straightforward improvement we did not tune on test data.",
     f"**Wrong values** ({E[MI]['wrong_value']} for the memory model) occur mostly when a stale value is the only one remaining (the update statement was not extracted).",
 ])
 D.figure(FIG / "fig7_distance.png", "Accuracy (fact + update questions) vs. number of turns since the last supporting statement.", 4.8)

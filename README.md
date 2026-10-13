@@ -33,8 +33,8 @@ mkdir -p data && curl -o data/locomo10.json https://raw.githubusercontent.com/sn
 - `experiments/` benchmark generator, **dev** (`templates_dev.py`) and **held-out test** (`templates_test.py`) templates, harness, LoCoMo run
 - `tests/`, `results/` (results.json, demo transcript), `report/` (report, slides, figures), `docs/` (viva notes)
 
-## Evaluation protocol
-Hyper-parameters were examined only on dev personas (seeds 1000-1029, dev templates). All reported numbers use test personas (seeds 2000-2099) with differently phrased templates written after the extractor/memory code was committed (c95a2ee). Only bug fixes were made afterwards; held-out accuracies were verified unchanged.
+## Evaluation protocol (and an honest caveat)
+Hyper-parameters were examined only on dev personas (seeds 1000-1029, dev templates). Reported numbers use test personas (seeds 2000-2099) with differently phrased templates (`templates_test.py`) that were written after the first commit (c95a2ee). **The extractor was not frozen at that commit**: before the first test run, patterns were generalised using dev errors and a salience bug was fixed; afterwards only third-party question handling changed (held-out accuracies verified identical). Extractor test P/R: 0.94/0.63 at c95a2ee, 0.96/0.73 final. The same team wrote the test templates and the patterns, so the test set is held out from tuning, not from the authors' knowledge; LoCoMo (not ours) and the oracle-perception run guard against this.
 
 ## Limitations
 Synthetic templated benchmark, rule-based perception and reader (no LLM), no human evaluation, budget counted in items. Not a measure of anyone's intelligence or memory.

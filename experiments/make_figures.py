@@ -37,7 +37,7 @@ def arrow(ax, a, b, text=None, rad=0.0):
 
 
 fig, ax = plt.subplots(figsize=(12, 6.4))
-ax.set_xlim(0, 12); ax.set_ylim(0, 6.6); ax.axis("off")
+ax.set_xlim(0, 12); ax.set_ylim(0, 6.8); ax.axis("off")
 box(ax, 0.1, 2.7, 1.5, 1.0, "User\nutterance", "#F2F2F2", bold=True)
 box(ax, 2.0, 2.2, 2.3, 2.0, "PERCEPTION &\nATTENTION\n\nfact extraction\nsalience score\nattention gate", "#FFE8B3", bold=False)
 box(ax, 4.8, 2.2, 2.0, 2.0, "WORKING MEMORY\n(capacity 7)\n\nrecent turns,\nrehearsal count,\nfast decay", "#CFE8F7")
@@ -48,11 +48,13 @@ box(ax, 7.5, 1.4, 2.6, 1.35, "Semantic store\nslot = value facts\nsupersession o
 box(ax, 10.6, 2.9, 1.3, 1.6, "Retrieval\n+ Reader\n\nanswer or\n\"I don't know\"", "#F8D9D9", fs=8.5, bold=False)
 box(ax, 7.5, 0.1, 2.6, 0.8, "FORGETTING: lowest activation\nevicted when budget exceeded", "#F5F5F5", fs=8)
 box(ax, 0.1, 0.1, 4.4, 0.95, "USER CONTROL & TRANSPARENCY\n/memory (inspect traces)   /forget (delete)", "#E8E0F0", fs=8.5)
-box(ax, 3.2, 5.35, 8.7, 0.7, "Activation  B = ln Σ (now − t_j)^−d   +  salience   (ACT-R base-level learning; rehearsal adds t_j)", "#FFFFFF", fs=8.5)
+box(ax, 3.2, 5.6, 8.7, 0.7, "Activation  B = ln Σ (now − t_j)^−d   +  salience   (ACT-R base-level learning; rehearsal adds t_j)", "#FFFFFF", fs=8.5)
 arrow(ax, (1.6, 3.2), (2.0, 3.2)); arrow(ax, (4.3, 3.2), (4.8, 3.2)); arrow(ax, (6.8, 3.3), (7.5, 3.7)); ax.text(6.55, 4.35, "displaced items\nare encoded", ha="center", fontsize=7.5, style="italic", color="#444")
 arrow(ax, (6.8, 3.0), (7.5, 2.2)); arrow(ax, (10.1, 3.8), (10.6, 3.8)); arrow(ax, (10.1, 2.2), (10.6, 3.2))
+ax.plot([5.8, 5.8, 11.25], [4.2, 5.4, 5.4], color="#333", lw=1.3, ls="--"); arrow(ax, (11.25, 5.4), (11.25, 4.5))
+ax.text(8.8, 5.43, "working memory is checked first when answering", ha="center", fontsize=7.5, style="italic", color="#444")
 arrow(ax, (8.8, 1.4), (8.8, 0.9)); arrow(ax, (11.25, 2.9), (11.25, 2.2)); ax.text(11.25, 2.0, "reply", ha="center", fontsize=8, style="italic")
-ax.text(0.15, 6.3, "Cognitive mapping:  attention → working memory → episodic / semantic LTM → forgetting & rehearsal",
+ax.text(0.15, 6.55, "Cognitive mapping:  attention → working memory → episodic / semantic LTM → forgetting & rehearsal",
         fontsize=9.5, fontweight="bold", color="#333")
 save("fig1_architecture")
 
