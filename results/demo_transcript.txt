@@ -1,0 +1,67 @@
+you> Hi, I'm Priya.
+bot> Got it. I'll remember your name is Priya.
+you> I live in Lisbon.
+bot> Got it. I'll remember that you live in Lisbon.
+you> I work as a nurse.
+bot> Got it. I'll remember that you work as a nurse.
+you> I have a pet parrot.
+bot> Got it. I'll remember that you have a pet parrot.
+you> The weather is lovely today.
+bot> I see.
+you> My sister lives in Rome.
+bot> Tell me more.
+you> My favorite food is ramen.
+bot> Got it. I'll remember your favorite food is ramen.
+you> /skip 30
+bot> (time passes: 30 hours)
+you> Good morning! Did you see the news?
+bot> I don't remember anything about that.
+you> Last weekend I visited Kyoto.
+bot> Interesting, noted.
+you> I enjoy painting in my free time.
+bot> Got it. I'll remember your hobby is painting.
+you> /skip 48
+bot> (time passes: 48 hours)
+you> Big news: I live in Toronto now.
+bot> Got it. I'll remember that you live in Toronto.
+you> /skip 72
+bot> (time passes: 72 hours)
+you> What is my name?
+bot> Your name is Priya.
+you> Where do I live?
+bot> You live in Toronto.
+you> What is my job?
+bot> You work as a nurse.
+you> Where does my sister live?
+bot> I only keep track of facts about you, not about other people.
+you> What is my favorite color?
+bot> I don't know — you haven't told me that.
+you> What is my favorite food?
+bot> Your favorite food is ramen.
+you> Where did I go last weekend?
+bot> You told me: "Last weekend I visited Kyoto."
+you> What do you remember about me?
+bot> Here is what I remember: job: nurse; pet: parrot; hobby: painting; name: Priya; city: Toronto; favorite food: ramen.
+you> /memory
+bot> Working memory (7/7):
+  [-5.09] Where do I live?
+  [-4.91] What is my job?
+  [-4.69] Where does my sister live?
+  [-4.40] What is my favorite color?
+  [-3.99] What is my favorite food?
+  [-3.30] Where did I go last weekend?
+  [+0.10] What do you remember about me?
+Long-term semantic memory (subject.slot = value, activation):
+  other.city = Rome   B=-3.30
+  user.name = Priya   B=-2.51
+  user.city = Lisbon   B=-3.30  [superseded]
+  user.job = nurse   B=-3.30
+  user.pet = parrot   B=-3.30
+  user.food = ramen   B=-1.02
+  user.hobby = painting   B=-3.24
+  user.city = Toronto   B=-3.12
+Long-term episodic traces: 9   total footprint: 24
+you> /forget city
+bot> Forgot your city (6 items removed).
+you> Where do I live?
+bot> I don't know — you haven't told me that.

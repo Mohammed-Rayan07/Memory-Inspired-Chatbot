@@ -33,5 +33,6 @@ def test_extract(text, expected):
 def test_question_slots():
     assert question_slot("What is my favorite food?") == ("food", "user")
     assert question_slot("Where do I live?") == ("city", "user")
-    assert question_slot("What's my sister's job?")[1] == "other" or True
+    assert question_slot("Where does my sister live?") == ("city", "other")
+    assert question_slot("What is my friend's favorite color?") == ("color", "other")
     assert question_slot("I live in Paris.") == (None, "user")

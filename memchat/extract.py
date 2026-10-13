@@ -136,11 +136,22 @@ _Q = {
 _Q = {k: re.compile(v, re.I) for k, v in _Q.items()}
 
 
+_KW = {k: re.compile(v, re.I) for k, v in {
+    "color": r"colou?r", "food": r"food|dish|eat", "city": r"\blive|city|home ?town", "job": r"job|work|profession",
+    "pet": r"\bpet", "hobby": r"hobby|free time", "music": r"music|genre", "drink": r"drink", "birthday": r"birthday|born",
+    "name": r"\bname"}.items()}
+
+
 def question_slot(text: str) -> tuple[str | None, str]:
     """Return (slot, subject) a question asks about, or (None, 'user')."""
     if not is_question(text):
         return None, "user"
     subject = "other" if re.search(rf"\bmy {OTHER}", text, re.I) else "user"
+    if subject == "other":      # third-party questions: map by keyword (the system will decline to answer them)
+        for slot, rx in _KW.items():
+            if rx.search(text):
+                return slot, subject
+        return None, subject
     for slot, rx in _Q.items():
         if rx.search(text):
             return slot, subject

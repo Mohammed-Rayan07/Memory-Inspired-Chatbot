@@ -271,6 +271,8 @@ class MemoryChatbot:
         return ans
 
     def _answer_slot(self, query: str, slot: str, subject: str, now: float) -> Answer:
+        if subject != "user":      # privacy by design: the assistant only answers about the user themself
+            return Answer(None, "I only keep track of facts about you, not about other people.", "none")
         cands: list[tuple[float, str, str, object]] = []   # (time of statement, value, route, turn)
         for w in self.wm:
             for f in w.facts:
