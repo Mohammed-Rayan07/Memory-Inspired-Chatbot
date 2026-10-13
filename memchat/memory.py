@@ -130,7 +130,7 @@ def salience_of(text: str, facts: list[Fact]) -> float:
     s = 0.1
     s += 0.2 if _FIRST.search(text) else 0
     s += 0.2 if any(c.isdigit() for c in text) else 0
-    s += 0.2 if any(w[:1].isupper() for w in toks[1:]) else 0
+    s += 0.2 if any(w[:1].isupper() and not re.match(r"I(?:'\w+)?$", w) for w in toks[1:]) else 0  # named entities (not "I")
     s += 0.1 if len(toks) > 8 else 0
     return min(s, 0.9)
 

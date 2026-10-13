@@ -39,7 +39,7 @@ _PAT: dict[str, list[re.Pattern]] = {
         re.compile(rf"\bmy (?:home ?town|city) is\s+{_PROPER}", re.I),
     ],
     "job": [
-        re.compile(rf"\b(?:i|he|she) (?:work|works) as (?:an?|the) {_WORDS}\b(?! at)", re.I),
+        re.compile(rf"\b(?:work|works) as (?:an?|the) {_WORDS}\b", re.I),
         re.compile(rf"\bi(?:'m| am) (?:an?|the) {_WORDS} by (?:profession|trade)", re.I),
         re.compile(rf"\bmy (?:job|profession|occupation) is (?:being )?(?:an?|the)? ?{_WORDS}\b", re.I),
     ],
@@ -50,7 +50,7 @@ _PAT: dict[str, list[re.Pattern]] = {
     ],
     "food": [
         re.compile(rf"\b(?:into|love|obsessed with) {_WORDS},? (?:it's|it is) (?:my|his|her) {_V} (?:food|dish|meal)", re.I),
-        re.compile(rf"\b{_V} (?:food|dish|meal) is {_WORDS}\b", re.I),
+        re.compile(rf"\b{_V} (?:food|dish|meal) is(?: now)? {_WORDS}\b", re.I),
         re.compile(rf"\b{_WORDS} is (?:my|his|her) {_V} (?:food|dish|meal)", re.I),
     ],
     "color": [
@@ -59,26 +59,26 @@ _PAT: dict[str, list[re.Pattern]] = {
         re.compile(rf"\b{_WORDS} is (?:my|his|her) {_V} colou?r", re.I),
     ],
     "hobby": [
-        re.compile(rf"\b(?:my|his|her) hobby is {_WORDS}\b", re.I),
+        re.compile(rf"\b(?:my|his|her|\w+'s) hobby is(?: now)? {_WORDS}\b", re.I),
         re.compile(rf"\bin (?:my|his|her) free time,? (?:i|he|she) (?:enjoys?|loves?|likes? to|likes?) {_WORDS}\b", re.I),
         re.compile(rf"\bi (?:enjoy|love) {_WORDS} in my free time", re.I),
     ],
     "music": [
-        re.compile(rf"\bi listen to (?:a lot of |mostly )?{_WORDS} music", re.I),
-        re.compile(rf"\b{_V} (?:music|genre|music genre) is {_WORDS}\b", re.I),
+        re.compile(rf"\b(?:i listen|listens) to (?:a lot of |mostly )?{_WORDS} music", re.I),
+        re.compile(rf"\b{_V} (?:music|genre|music genre) is(?: now)? {_WORDS}\b", re.I),
     ],
     "drink": [
         re.compile(rf"\bi usually drink {_WORDS} in the morning", re.I),
         re.compile(rf"\b(?:my )?go-to drink is {_WORDS}\b", re.I),
-        re.compile(rf"\b{_V} drink is {_WORDS}\b", re.I),
+        re.compile(rf"\b{_V} drink is(?: now)? {_WORDS}\b", re.I),
     ],
     "birthday": [
-        re.compile(rf"\b(?:my|his|her) birthday is in ({'|'.join(MONTHS)})", re.I),
-        re.compile(rf"\b(?:i was|he was|she was) born in ({'|'.join(MONTHS)})", re.I),
+        re.compile(rf"\b(?:my|his|her|\w+'s) birthday is in ({'|'.join(MONTHS)})", re.I),
+        re.compile(rf"\bwas born in ({'|'.join(MONTHS)})", re.I),
     ],
 }
 
-_TRAIL = re.compile(r"\b(?:and|but|because|so|too|these days|lately|now|recently|a lot|very much|at|in|with|for|on|from|since)\b.*$")
+_TRAIL = re.compile(r"\b(?:and|but|because|so|too|these|lately|now|recently|a lot|very much|at|in|with|for|on|from|since)\b.*$")
 
 
 @dataclass(frozen=True)
